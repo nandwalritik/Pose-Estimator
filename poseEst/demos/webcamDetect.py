@@ -1,11 +1,11 @@
-from ..modelLib.models import PoseDetector
+from ..modelLib.models.PoseDetector import PoseDetector
 import cv2
 import imutils
 from ..modelLib.utils.utils import showImage
 import numpy as np
 
 
-PD = PoseDetector(True, 2, False, 0.5)
+PD = PoseDetector(True, 2, True, 0.5)
 cap = cv2.VideoCapture(0)
 while cap.isOpened():
     success, image = cap.read()
