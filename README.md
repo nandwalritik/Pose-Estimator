@@ -6,3 +6,4 @@
 * python3 -m pathTofile
 * Create datasets folder and place all videos inside Yoga_Vid_Collected inside that
 * create classifiedData folder inside datasets folder
+* python3 poseEst/modelLib/train.py

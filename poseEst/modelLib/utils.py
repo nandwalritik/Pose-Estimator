@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 import os
-from modelLib.models.PoseDetector import PoseDetector
+from models.PoseDetector import PoseDetector
 
 
 """-----------Show Image----------"""
@@ -51,9 +51,9 @@ def store_frames(frames, path2store):
         cv2.imwrite(path2img, frame)
 
 
-def train_test_split(videos_path, split):
-    totallen = len(videos_path)
+def train_test_split(videos_paths, split):
+    totallen = len(videos_paths)
     val_len = int(split*totallen)
     train_len = totallen - val_len
-    train_videos_path, val_videos_path = videos_path[:train_len], videos_path[train_len:]
+    train_videos_path, val_videos_path = videos_paths[:train_len], videos_paths[train_len:]
     return train_videos_path, val_videos_path
