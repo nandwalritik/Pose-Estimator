@@ -1,7 +1,7 @@
 from ..modelLib.models.PoseDetector import PoseDetector
 import cv2
 import imutils
-from ..modelLib.utils.utils import showImage
+from ..modelLib.utils import showImage
 import numpy as np
 
 

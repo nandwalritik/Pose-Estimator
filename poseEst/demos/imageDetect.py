@@ -2,19 +2,20 @@
 from ..modelLib.models.PoseDetector import PoseDetector
 import cv2
 import imutils
-from ..modelLib.utils.utils import showImage
+from ..modelLib.utils import showImage
 import numpy as np
+from PIL import Image
 
-
-PD = PoseDetector(True, 2, True, 0.5)
-img = cv2.imread('/home/nandwalritik/poseEstimator/poseEst/demoImages/demo3.jpg')
+PD = PoseDetector(True, 2, False, 0.5)
+img = cv2.imread('/home/nandwalritik/poseEstimator/poseEst/demoImages/home.jpg')
 
 image_height, image_width, _ = img.shape
 img = imutils.resize(img, width=720)
-showImage(img, "Input Image")
+# showImage(img, "Input Image")
 
 results = PD.detectJoints(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 print(results.pose_landmarks)
+print(type(results.pose_landmarks))
 annotated_image = img.copy()
 
 # Draw segmentation on the image.
@@ -32,4 +33,4 @@ PD.mp_drawing.draw_landmarks(
     results.pose_landmarks,
     PD.mp_pose.POSE_CONNECTIONS,
     landmark_drawing_spec=PD.mp_drawing_styles.get_default_pose_landmarks_style())
-showImage(annotated_image, "Annotated Image")
+# showImage(annotated_image, "Annotated Image")
