@@ -1,6 +1,7 @@
 """
     This file contains utility functions
 """
+
 import cv2
 import numpy as np
 import os
@@ -52,8 +53,8 @@ def store_frames(frames, path2store):
 
 
 def train_test_split(videos_paths, split):
-    totallen = len(videos_paths)
-    val_len = int(split*totallen)
-    train_len = totallen - val_len
+    total_len = len(videos_paths)
+    val_len = int(split*total_len)
+    train_len = total_len - val_len
     train_videos_path, val_videos_path = videos_paths[:train_len], videos_paths[train_len:]
     return train_videos_path, val_videos_path

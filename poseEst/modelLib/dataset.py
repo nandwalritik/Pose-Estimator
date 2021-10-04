@@ -17,22 +17,21 @@ import utils
 
 
 class PoseDataset(Dataset):
-    def __init__(self, root_path, videos_name_list, transform=None):
-        self.root_path = root_path
-        self.videos_name_list = videos_name_list
+    def __init__(self, videos_dir, videos_name_list, transform=None, n_frames=45):
+        self.videos_dir = videos_dir
         self.transform = transform
-        # self.videos = os.listdir(self.videos_dir)
+        self.n_frames = n_frames
+        self.videos_name = videos_name_list
 
     def __len__(self):
-        return len(self.videos_name_list)
+        return len(self.videos_name)
 
     def __getitem__(self, index):
-        video_path = os.path.join(self.root_path, self.videos_name_list[index])
-        # frames,v_len = utils.
-        frames, v_len = utils.get_frames_keypoints(video_path, n_frames=45)
-        label = self.videos_name_list[index][self.videos_name_list[index].find(
-            "_")+1:self.videos_name_list[index].find(".")]
-        
+        video_path = os.path.join(self.videos_dir, self.videos_name[index])
+        frames, v_len = utils.get_frames_keypoints(
+            video_path, n_frames=self.n_frames)
+        label = self.videos_name[index][self.videos_name[index].find(
+            "_")+1:self.videos_name[index].find(".")]
         if self.transform is not None:
             pass
 

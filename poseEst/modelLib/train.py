@@ -34,10 +34,11 @@ if __name__ == "__main__":
 
     train_images_names, val_images_names = utils.train_test_split(
         images, config.SPLIT)
+    print(train_images_names)
     print('\n------------Creating Dataset Objects------------\n')
-    train_data = PoseDataset(root_path=config.root_path,
+    train_data = PoseDataset(videos_dir=config.root_path,
                              videos_name_list=train_images_names)
-    val_data = PoseDataset(root_path=config.root_path,
+    val_data = PoseDataset(videos_dir=config.root_path,
                            videos_name_list=val_images_names)
     print('\n------------Completed Dataset Creation-----------\n')
 
@@ -48,6 +49,9 @@ if __name__ == "__main__":
     val_dataloader = DataLoader(
         val_data, batch_size=config.BATCH_SIZE, shuffle=False)
     print('\n----------------Dataloaders Done-----------------\n')
+    
+    # model = model.to(config.device)
+    # optimizer = optim.Adam(model.parameters(),lr=config.LR)
+    # loss_fn = nn.CrossEntropyLoss()
 
-    # optimizer =
-    # loss_fn =
+    print(train_data.__getitem__(0))
