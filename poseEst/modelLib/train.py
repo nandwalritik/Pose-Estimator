@@ -14,17 +14,48 @@ from PIL import Image
 import torchvision.transforms as transforms
 import os
 import torch.nn.functional as F
-import config
-import utils
-from dataset import PoseDataset
+from . import config,utils
+from .dataset import PoseDataset
+from .models.PoseClassifier import PoseClassifier
 
 
-def fit(model, dataloader, data, optimzer, loss_fn):
-    pass
+def fit(model, dataloader, data, optimizer, loss_fn):
+    print('\n-------------------Training--------------------\n')
+    model.train()
+    train_running_loss = 0.0
+    counter = 0
+
+    # num of batches
+    num_batches = int(len(data)/dataloader.batch_size)
+    for i, data in enumerate(dataloader, total=num_batches):
+        counter += 1
+        keypoints, labels = data["keypoints"], data["label"]
+        optimizer.zero_grad()
+        outputs = model(keypoints)
+        loss = loss_fn(outputs, labels)
+        train_running_loss += loss.item()
+        loss.backward()
+        optimizer.step()
+    train_loss = train_running_loss/counter
+    return train_loss
 
 
 def validate(model, dataloader, data, loss_fn):
-    pass
+    print('\n------------------Validating--------------------\n')
+    model.eval()
+    valid_running_loss = 0.0
+    counter = 0
+    # num of batches
+    num_batches = int(len(data)/dataloader.batch_size)
+    with torch.no_grad():
+        for i, data in tqdm(enumerate(dataloader), total=num_batches):
+            counter += 1
+            keypoints, labels = data["keypoints"], data["label"]
+            outputs = model(keypoints)
+            loss = loss_fn(outputs, labels)
+            valid_running_loss += loss.item()
+    valid_loss = valid_running_loss/counter
+    return valid_loss
 
 
 if __name__ == "__main__":
@@ -49,9 +80,38 @@ if __name__ == "__main__":
     val_dataloader = DataLoader(
         val_data, batch_size=config.BATCH_SIZE, shuffle=False)
     print('\n----------------Dataloaders Done-----------------\n')
-    
-    # model = model.to(config.device)
-    # optimizer = optim.Adam(model.parameters(),lr=config.LR)
-    # loss_fn = nn.CrossEntropyLoss()
 
-    print(train_data.__getitem__(0))
+    model = PoseClassifier().to(config.DEVICE)
+    optimizer = optim.Adam(model.parameters(), lr=config.LR)
+    loss_fn = nn.CrossEntropyLoss()
+
+    train_loss = []
+    val_loss = []
+    for epoch in range(config.EPOCHS):
+        print(f"Epoch {epoch+1} of {config.EPOCHS}")
+        # train_epoch_loss = fit(model, train_dataloader,
+        #                        train_data, optimizer, loss_fn)
+        val_epoch_loss = validate(model, val_dataloader, val_data, loss_fn)
+
+        # train_loss.append(train_epoch_loss)
+        val_loss.append(val_epoch_loss)
+        # print(f"Train Loss: {train_epoch_loss:.4f}")
+        print(f'Val Loss: {val_epoch_loss:.4f}')
+    
+    # loss plots
+    plt.figure(figsize=(10, 7))
+    plt.plot(train_loss, color="orange", label='train loss')
+    plt.plot(val_loss, color="red", label='validation loss')
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    # plt.savefig(f"../input/loss.png")
+    plt.show()
+    torch.save({
+        'epoch': config.EPOCHS,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss_fn,
+    }, "./model.pth")
+
+    print("\n---------DONE TRAINING----------\n")
