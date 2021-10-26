@@ -14,6 +14,7 @@ import torch.nn.functional as F
 from .utils import get_frames_keypoints
 from sklearn.preprocessing import LabelEncoder
 from . import config
+import imageio
 
 
 class PoseDataset(Dataset):
@@ -55,23 +56,27 @@ class PoseDataset(Dataset):
 
 
 # Uncomment below to check visualizations
-if __name__ == "__main__":
-    root_path = "./datasets/YogaVidCollected/Yoga_Vid_Collected"
-    images = os.listdir(root_path)
-    temp = PoseDataset(root_path, images)
-    data = temp.__getitem__(5)
-    print(data["label"])
-    print(np.array(data['keypoints'].detach().cpu()).shape)
-    print(data['keypoints'][0])
-    # plt.scatter(temp[:,0],temp[:,1])
-    # plt.show()
-    frameList = []
-    for i in range(len(data["keypoints"])):
-        img = np.ones((700, 1000, 3))
-        temp = np.array(data["keypoints"][i].detach().cpu())
-        for x in temp:
-            # print(x)
-            # substracted 200 pixels to adjust pose inside frame
-            cv2.circle(img, (int(x[0])-200, int(x[1])), 3, (0, 0, 0), 3)
-        cv2.imshow("Yoga Asana", img)
-        cv2.waitKey(200)
+# if __name__ == "__main__":
+#     root_path = "./datasets/YogaVidCollected/Yoga_Vid_Collected"
+#     images = os.listdir(root_path)
+#     temp = PoseDataset(root_path, images)
+#     data = temp.__getitem__(5)
+#     print(data["label"])
+#     print(np.array(data['keypoints'].detach().cpu()).shape)
+#     print(data['keypoints'][0])
+#     # plt.scatter(temp[:,0],temp[:,1])
+#     # plt.show()
+#     frameList = []
+#     for i in range(len(data["keypoints"])):
+#         img = np.ones((700, 1000, 3))
+#         temp = np.array(data["keypoints"][i].detach().cpu())
+#         for x in temp:
+#             # print(x)
+#             # substracted 200 pixels to adjust pose inside frame
+#             cv2.circle(img, (int(x[0])-200, int(x[1])), 3, (0, 0, 0), 3)
+#         cv2.imshow("Yoga Asana", img)
+#         cv2.waitKey(200)
+#         # frame_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#         frameList.append(img)
+#     imageio.mimsave('./SamplePose.gif', frameList, fps=10)
+    
