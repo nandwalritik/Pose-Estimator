@@ -15,6 +15,7 @@ Clone The Repository    :
 ```
 ### Dataset
 * Download [dataset](https://www.kaggle.com/nandwalritik/yoga-pose-videos-dataset) from here
+
 <!-- ## Running
 ## for running imageDetect and all , move inside POSEESTIMATOR folder
 * python3 -m poseEst.demos.imageDetect

@@ -11,7 +11,7 @@ class PoseDetector:
         self.poseDetector = Pose(static_image_mode=static_image_mode,
                                  model_complexity=model_complexity,
                                  enable_segmentation=enable_segmentation,
-                                 min_detection_confidence=min_detection_confidence)
+                                 min_detection_confidence=0.2)
 
     def detectJoints(self, image):
         joints = self.poseDetector.process(image)

@@ -3,8 +3,6 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import torchvision
-from torchvision import datasets, transforms
 from tqdm import tqdm
 import cv2
 from torch.utils.data import Dataset, DataLoader
@@ -18,7 +16,7 @@ from sklearn.preprocessing import LabelEncoder
 from . import config
 
 class PoseDataset(Dataset):
-    def __init__(self, videos_dir, videos_name_list, transform=None, n_frames=44):
+    def __init__(self, videos_dir, videos_name_list, transform=None, n_frames=70):
         self.videos_dir = videos_dir
         self.transform = transform
         self.n_frames = n_frames
@@ -34,19 +32,24 @@ class PoseDataset(Dataset):
 
     def __getitem__(self, index):
         video_path = os.path.join(self.videos_dir, self.videos_name[index])
+        # print('\n------------PrintPath------------\n')
+        # print(video_path)
         keypoints, v_len = get_frames_keypoints(
             video_path, n_frames=self.n_frames)
         label = self.videos_name[index][self.videos_name[index].find(
             "_")+1:self.videos_name[index].find(".")]
+        label = int(self.le.transform([label])[0])
+        # print(label)
         if self.transform is not None:
             pass
 
         # Here frames is a dict containing frame and posekeypoints
         # {"frame": frame, "pose_keypoints": lmkList}
+        targetTensor = torch.ones(45)*label
 
         return {
             "keypoints": torch.tensor(keypoints,dtype=torch.float).to(config.DEVICE),
-            "label": torch.tensor(self.le.transform([label]),dtype=torch.float).to(config.DEVICE),
+            "label": torch.tensor(targetTensor,dtype=torch.float).to(config.DEVICE),
             # "v_len":v_len
         }
 
@@ -58,8 +61,8 @@ class PoseDataset(Dataset):
 #     temp = PoseDataset(root_path, images)
 #     data = temp.__getitem__(44)
 #     print(data["label"])
-#     # print(np.array(data['keypoints']).shape)
-#     # print(data['keypoints'][0])
+    # print(np.array(data['keypoints']).shape)
+    # print(data['keypoints'][0])
 #     # plt.scatter(temp[:,0],temp[:,1])
 #     # plt.show()
 #     for i in range(len(data["keypoints"])):

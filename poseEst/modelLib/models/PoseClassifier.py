@@ -1,13 +1,10 @@
 import torch
 import torch.nn as nn
-from torch.nn.modules.rnn import LSTM
+from .. import config
 
 """
     The imp keypoints afaik
-    11,12,13,14,15,16,17,18
-    23,24
-    25,26
-    27,28
+    11,12,13,14,15,16,17,18,23,24,25,26,27,28
 """
 
 
@@ -18,8 +15,8 @@ class TimeDistributed(nn.Module):
 
     def forward(self, x):
         batch_size, time_steps, _, num_keypoints, dim = x.size()
-        print(x.size())
-        output = torch.tensor([])
+        # print(x.size())
+        output = torch.tensor([]).to(config.DEVICE)
         for i in range(time_steps):
             output_t = self.layers[i](x[:, i, :, :, :])
             output_t = output_t.unsqueeze(1)
@@ -69,18 +66,16 @@ class PoseClassifier(nn.Module):
             TimeDistributed(nn.Dropout, time_steps=45, p=0.5),
             # nn.BatchNorm2d(16),
             TimeDistributed(nn.Flatten, time_steps=45),
-            LSTMModel(6, 20, 120, 240)
+            LSTMModel(6, 20, 120, 224)
         )
 
     def forward(self, x):
         return self.model(x)
 
 
-"""
-if __name__ == "__main__":
-    model = PoseClassifier()
-    temp = torch.rand(20, 45, 1, 16, 2)
-    output = model(temp)
-    # print(output)
-    print(output.shape)
-"""
+# if __name__ == "__main__":
+#     model = PoseClassifier().to(config.DEVICE)
+#     temp = torch.rand(20, 45, 1, 15, 2).to(config.DEVICE)
+#     output = model(temp)
+#     # print(output)
+#     print(output.shape)

@@ -14,7 +14,7 @@ from PIL import Image
 import torchvision.transforms as transforms
 import os
 import torch.nn.functional as F
-from . import config,utils
+from . import config, utils
 from .dataset import PoseDataset
 from .models.PoseClassifier import PoseClassifier
 
@@ -27,11 +27,16 @@ def fit(model, dataloader, data, optimizer, loss_fn):
 
     # num of batches
     num_batches = int(len(data)/dataloader.batch_size)
-    for i, data in enumerate(dataloader, total=num_batches):
+    for i, data in tqdm(enumerate(dataloader), total=num_batches):
         counter += 1
         keypoints, labels = data["keypoints"], data["label"]
         optimizer.zero_grad()
+        if len(keypoints.shape) != 5:
+            keypoints = keypoints.unsqueeze(2)
+
         outputs = model(keypoints)
+        outputs = torch.transpose(outputs, 1, 2)
+        labels = labels.to(torch.long)
         loss = loss_fn(outputs, labels)
         train_running_loss += loss.item()
         loss.backward()
@@ -51,7 +56,14 @@ def validate(model, dataloader, data, loss_fn):
         for i, data in tqdm(enumerate(dataloader), total=num_batches):
             counter += 1
             keypoints, labels = data["keypoints"], data["label"]
+            if len(keypoints.shape) != 5:
+                keypoints = keypoints.unsqueeze(2)
             outputs = model(keypoints)
+            # outputs is of format [batch_size,num_of_frames,num_of_classes]
+            # we need to convert it to [batch_size,num_of_classes,num_of_frames]
+            outputs = torch.transpose(outputs, 1, 2)
+            labels = labels.to(torch.long)
+            # print(outputs.shape,labels.shape)
             loss = loss_fn(outputs, labels)
             valid_running_loss += loss.item()
     valid_loss = valid_running_loss/counter
@@ -65,7 +77,7 @@ if __name__ == "__main__":
 
     train_images_names, val_images_names = utils.train_test_split(
         images, config.SPLIT)
-    print(train_images_names)
+    # print(train_images_names)
     print('\n------------Creating Dataset Objects------------\n')
     train_data = PoseDataset(videos_dir=config.root_path,
                              videos_name_list=train_images_names)
@@ -84,20 +96,21 @@ if __name__ == "__main__":
     model = PoseClassifier().to(config.DEVICE)
     optimizer = optim.Adam(model.parameters(), lr=config.LR)
     loss_fn = nn.CrossEntropyLoss()
+    loss_fn = loss_fn.to(config.DEVICE)
 
     train_loss = []
     val_loss = []
     for epoch in range(config.EPOCHS):
         print(f"Epoch {epoch+1} of {config.EPOCHS}")
-        # train_epoch_loss = fit(model, train_dataloader,
-        #                        train_data, optimizer, loss_fn)
+        train_epoch_loss = fit(model, train_dataloader,
+                               train_data, optimizer, loss_fn)
         val_epoch_loss = validate(model, val_dataloader, val_data, loss_fn)
 
-        # train_loss.append(train_epoch_loss)
+        train_loss.append(train_epoch_loss)
         val_loss.append(val_epoch_loss)
-        # print(f"Train Loss: {train_epoch_loss:.4f}")
+        print(f"Train Loss: {train_epoch_loss:.4f}")
         print(f'Val Loss: {val_epoch_loss:.4f}')
-    
+
     # loss plots
     plt.figure(figsize=(10, 7))
     plt.plot(train_loss, color="orange", label='train loss')
