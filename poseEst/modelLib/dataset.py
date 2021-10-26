@@ -15,6 +15,7 @@ from .utils import get_frames_keypoints
 from sklearn.preprocessing import LabelEncoder
 from . import config
 
+
 class PoseDataset(Dataset):
     def __init__(self, videos_dir, videos_name_list, transform=None, n_frames=70):
         self.videos_dir = videos_dir
@@ -25,7 +26,6 @@ class PoseDataset(Dataset):
         self.classes = ["Bhujangasana", "Padmasana",
                         "Shavasana", "Tadasana", "Trikonasana", "Vrikshasana"]
         self.le.fit(self.classes)
-        
 
     def __len__(self):
         return len(self.videos_name)
@@ -48,28 +48,30 @@ class PoseDataset(Dataset):
         targetTensor = torch.ones(45)*label
 
         return {
-            "keypoints": torch.tensor(keypoints,dtype=torch.float).to(config.DEVICE),
-            "label": torch.tensor(targetTensor,dtype=torch.float).to(config.DEVICE),
+            "keypoints": torch.tensor(keypoints, dtype=torch.float).to(config.DEVICE),
+            "label": torch.tensor(targetTensor, dtype=torch.float).to(config.DEVICE),
             # "v_len":v_len
         }
 
 
 # Uncomment below to check visualizations
-# if __name__ == "__main__":
-#     root_path = "./datasets/YogaVidCollected/Yoga_Vid_Collected"
-#     images = os.listdir(root_path)
-#     temp = PoseDataset(root_path, images)
-#     data = temp.__getitem__(44)
-#     print(data["label"])
-    # print(np.array(data['keypoints']).shape)
-    # print(data['keypoints'][0])
-#     # plt.scatter(temp[:,0],temp[:,1])
-#     # plt.show()
-#     for i in range(len(data["keypoints"])):
-#         img = np.ones((768, 1366, 3))
-#         temp = np.array(data["keypoints"][i])
-#         for x in temp:
-#             # print(x)
-#             cv2.circle(img, (x[0], x[1]), 2, (255, 255, 0), 2)
-#         cv2.imshow(str(data["label"]), img)
-#         cv2.waitKey(90)
+if __name__ == "__main__":
+    root_path = "./datasets/YogaVidCollected/Yoga_Vid_Collected"
+    images = os.listdir(root_path)
+    temp = PoseDataset(root_path, images)
+    data = temp.__getitem__(5)
+    print(data["label"])
+    print(np.array(data['keypoints'].detach().cpu()).shape)
+    print(data['keypoints'][0])
+    # plt.scatter(temp[:,0],temp[:,1])
+    # plt.show()
+    frameList = []
+    for i in range(len(data["keypoints"])):
+        img = np.ones((700, 1000, 3))
+        temp = np.array(data["keypoints"][i].detach().cpu())
+        for x in temp:
+            # print(x)
+            # substracted 200 pixels to adjust pose inside frame
+            cv2.circle(img, (int(x[0])-200, int(x[1])), 3, (0, 0, 0), 3)
+        cv2.imshow("Yoga Asana", img)
+        cv2.waitKey(200)
